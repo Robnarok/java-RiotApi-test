@@ -1,0 +1,35 @@
+version: "3.5"
+services:
+  yoneban:
+    restart: unless-stopped
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    ports:
+      - "8090:8080"
+    environment:
+      - foobar=hey
+      #      - SERVER_PORT=8080
+      #      - SPRING_PROFILES_ACTIVE=prod
+      #      - SPRING_DATASOURCE_USERNAME=unicorn_user
+      #      - SPRING_DATASOURCE_PASSWORD=magical_password
+      #      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/rainbow_database
+        #    depends_on:
+        #      - database
+
+        #  database:
+        #    restart: unless-stopped
+        #    image: "postgres"
+        #    env_file:
+        #      - database.env
+        #    volumes:
+        #      - database-data:/var/lib/postgresql/data/
+
+
+#  adminer:
+#    image: adminer
+#    restart: unless-stopped
+#    ports:
+#      - 8082:8080
+#volumes:
+#  database-data:
