@@ -208,3 +208,4 @@ modules.xml
 # # End of https://www.toptal.com/developers/gitignore/api/gradle
 
 prod-database
+secret.env
