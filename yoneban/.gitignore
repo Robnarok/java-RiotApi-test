@@ -210,3 +210,7 @@ gradle-app.setting
 
 database/
 data.mv.db
+build/resources/main/application.properties
+build.gradle
+
+
