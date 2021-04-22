@@ -1,5 +1,6 @@
 package com.robnarok.yoneban;
 
+import com.robnarok.yoneban.services.ApiFetcher;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

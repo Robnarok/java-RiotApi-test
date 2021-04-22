@@ -12,7 +12,7 @@ services:
     volumes:
       - ./prod-database/:/home/gradle/database/
       #      - SERVER_PORT=8080
-      #   env_file:
-      #     - database.env
+    env_file:
+      - secret.env
 
 
