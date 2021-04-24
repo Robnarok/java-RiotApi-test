@@ -82,7 +82,7 @@ public class ApiFetcher {
 
 
         JsonObject rootJson = new Gson().fromJson(response.body(),JsonObject.class);
-        Matchdata matchdata = new Matchdata();
+        Matchdata matchdata = new Matchdata(matchid);
 
         JsonObject info = rootJson.get("info").getAsJsonObject();
 

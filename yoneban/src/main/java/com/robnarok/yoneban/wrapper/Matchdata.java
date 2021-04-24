@@ -5,14 +5,20 @@ import java.util.List;
 
 public class Matchdata {
 
+    String matchId;
     List<Ban> bans;
     List<Player> players;
     String date="0";
     String gameMode="NaN";
 
-    public Matchdata(){
+    public Matchdata(String matchid){
+        this.matchId = matchid;
         bans = new ArrayList<Ban>();
         players = new ArrayList<Player>();
+    }
+
+    public String getMatchId() {
+        return matchId;
     }
 
     public String getDate() {
