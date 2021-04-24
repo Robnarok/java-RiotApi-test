@@ -1,17 +1,15 @@
-package com.robnarok.yoneban.dto;
+package com.robnarok.yoneban.wrapper;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class BanDTO {
+public class Ban {
     private String championId;
     private String pickTurn;
 
-    public BanDTO(String championId, String pickTurn){
+    public Ban(String championId, String pickTurn){
         this.championId = championId;
         this.pickTurn = pickTurn;
     }
 
-    public BanDTO() {
+    public Ban() {
 
     }
 
@@ -29,6 +27,10 @@ public class BanDTO {
 
     public void setPickTurn(String pickTurn) {
         this.pickTurn = pickTurn;
+    }
+
+    public boolean isChampion (String championId){
+        return championId.equals(this.championId);
     }
 
     @Override

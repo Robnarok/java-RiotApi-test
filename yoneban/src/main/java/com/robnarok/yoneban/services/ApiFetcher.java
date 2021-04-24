@@ -3,20 +3,15 @@ package com.robnarok.yoneban.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
-import com.robnarok.yoneban.dto.BanDTO;
-import com.robnarok.yoneban.dto.MatchDTO;
+import com.robnarok.yoneban.wrapper.Ban;
+import com.robnarok.yoneban.wrapper.Matchdata;
 import com.robnarok.yoneban.dto.MatchhistoryDTO;
 import com.robnarok.yoneban.dto.SummonerDTO;
+import com.robnarok.yoneban.wrapper.Player;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,7 +19,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -76,9 +70,7 @@ public class ApiFetcher {
         return null;
     }
 
-    public void requestBansFromMatch(String matchid) throws IOException, InterruptedException {
-
-        ObjectMapper mapper = new ObjectMapper();
+    public Matchdata requestBansFromMatch(String matchid) throws IOException, InterruptedException {
         String uri = "https://europe.api.riotgames.com/lol/match/v5/matches/" + matchid + "?api_key=" + secret;
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -90,25 +82,52 @@ public class ApiFetcher {
 
 
         JsonObject rootJson = new Gson().fromJson(response.body(),JsonObject.class);
-        MatchDTO matchDTO = new MatchDTO();
+        Matchdata matchdata = new Matchdata();
 
-        JsonArray teams = rootJson.get("info").getAsJsonObject().get("teams").getAsJsonArray();
+        JsonObject info = rootJson.get("info").getAsJsonObject();
+
+        matchdata.setGameMode(info.get("gameMode").getAsString());
+        matchdata.setDate(info.get("gameStartTimestamp").getAsString());
+
+
+        String summonerName;
+        int pentaKills;
+        String championName;
+        String teamPosition;
+        int teamId;
+
+        for (JsonElement participant : info.get("participants").getAsJsonArray()){
+            summonerName = participant.getAsJsonObject().get("summonerName").getAsString();
+            pentaKills = participant.getAsJsonObject().get("pentaKills").getAsInt();
+            championName = participant.getAsJsonObject().get("championName").getAsString();
+            teamPosition = participant.getAsJsonObject().get("teamPosition").getAsString();
+            teamId = participant.getAsJsonObject().get("teamId").getAsInt();
+
+            matchdata.addPlayer(new Player(
+                    summonerName,
+                    pentaKills,
+                    championName,
+                    teamPosition,
+                    teamId));
+        }
+
+        JsonArray teams = info.get("teams").getAsJsonArray();
         JsonArray bans;
 
-        BanDTO tmp = new BanDTO();
+
+        Ban tmp = new Ban();
 
         for (JsonElement foo : teams){
             bans = foo.getAsJsonObject().get("bans").getAsJsonArray();
             for (JsonElement ban : bans){
                 tmp.setChampionId(ban.getAsJsonObject().get("championId").getAsString());
                 tmp.setPickTurn(ban.getAsJsonObject().get("pickTurn").getAsString());
-                matchDTO.add(tmp);
-                tmp = new BanDTO();
+                matchdata.addBan(tmp);
+                tmp = new Ban();
             }
         }
-        System.out.println(matchDTO);
 
-
+        return matchdata;
 
     }
 }
