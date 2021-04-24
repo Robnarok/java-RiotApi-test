@@ -21,11 +21,13 @@ public class BotConfiguration {
     @Value("${discordPrefix}")
     String prefix;
 
+    @Value("${discordActivity}")
+    String discordActivity;
+
     @Bean
     public JDA createJDA() throws LoginException {
         JDA jda = JDABuilder.createDefault(token).build();
-        jda.getPresence().setPresence(OnlineStatus.DO_NOT_DISTURB, Activity.playing("Yonekiller200"));
-
+        jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing(discordActivity));
         jda.addEventListener(new DiscordListener(prefix));
         return jda;
     }

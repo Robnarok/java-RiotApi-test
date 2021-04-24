@@ -57,6 +57,10 @@ public class Matchdata {
         return false;
     }
 
+    public boolean isValid(){
+        return this.gameMode.equals("CLASSIC");
+    }
+
     @Override
     public String toString() {
         return "MatchDTO{" +
