@@ -19,6 +19,10 @@ public class PersistentMatch {
     @Transient
     Matchdata matchdata;
 
+    public Matchdata getMatchdata() {
+        return matchdata;
+    }
+
     public PersistentMatch() {
     }
 

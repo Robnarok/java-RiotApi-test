@@ -12,10 +12,15 @@ import net.dv8tion.jda.api.JDA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -40,7 +45,13 @@ public class ApplicationRunner implements CommandLineRunner {
     String championId;
 
     @Override
-    public void run(String... args) throws Exception {
+
+    public void run(String... args){
+        System.out.println("Hello There");
+    }
+
+    @Scheduled(fixedRate = 10 * 60 * 1000)
+    public void scheduledCheck(){
 
         SummonerDTO summoner = apiFetcher.requestSummonerDTO(summonerName);
         MatchhistoryDTO matchhistoryDTO = apiFetcher.requestLastFiveMatches(summoner.puuid);
@@ -52,30 +63,32 @@ public class ApplicationRunner implements CommandLineRunner {
             return;
         }
 
-
         Matchdata matchdata;
         MatchdataList matchdataList= new MatchdataList();
 
-
-
         for (String match : matchhistoryDTO.getMatches()) {
-            matchdata = apiFetcher.requestBansFromMatch(match);
+            try {
+                matchdata = apiFetcher.requestBansFromMatch(match);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
             matchdataList.addMatchdata(matchdata);
         }
 
+
         // Removes ARAM and Feature Gamemode Games, sadly after the API Query
         matchdataList = banService.removeInvalid(matchdataList);
-
-
-        matchdataList = banService.filterWithPersistenMatch(persistentMatchList, matchdataList);
-        //At this pont the matchdataList should only contain unchecked data
-
-        // turn Matchdata to PersistenMatch
 
         List<PersistentMatch> newPersistenMatches = new ArrayList<PersistentMatch>();
 
         // Counter could get improved
         int counter = newPersistenMatches.size();
+
+        Collections.reverse( matchdataList.getMatchdata());
         for (Matchdata matchdata1: matchdataList.getMatchdata()){
             counter++;
             newPersistenMatches.add(new PersistentMatch(
@@ -84,9 +97,10 @@ public class ApplicationRunner implements CommandLineRunner {
 
         }
         persistenMatchRepository.saveAll(newPersistenMatches);
-        // Print new Bans
-
         banService.printNewBanEvents(newPersistenMatches);
 
     }
+
+
+
 }

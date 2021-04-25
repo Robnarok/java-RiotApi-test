@@ -8,6 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
 @Service
 public class DiscordPrint {
     @Autowired
@@ -33,14 +38,26 @@ public class DiscordPrint {
 
         if (persistentMatch.isGotBanned()){
             embeded.setColor(0x09e589);
-            embeded.setDescription(championName + " wurde gebannt!");
+            embeded.setDescription(championName + " wurde gebannt! Das war das " + persistentMatch.getCounter() + ". mal!");
         }
         else {
             embeded.setColor(0xe5092a);
             embeded.setDescription(championName + " wurde nicht gebannt!");
         }
 
-        embeded.addField("Uhrzeit", , false);
+
+        long timestamp = Long.parseLong(persistentMatch.getMatchdata().getDate());
+        Date date = new Date(timestamp);
+        LocalDateTime localDateTime = new java.sql.Timestamp(date.getTime()).toLocalDateTime();
+        DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("HH:mm:ss - dd.LL.yyyy");
+
+        embeded.addField("Uhrzeit", localDateTime.format(customFormatter), true);
+
+        String matchId = persistentMatch.getMatchID();
+        matchId = matchId.split("_")[1];
+
+        embeded.addField("League of Graphs","https://www.leagueofgraphs.com/match/euw/" + matchId,false);
+
 
         textChannelById.sendMessage(embeded.build()).queue();
         embeded.clear();

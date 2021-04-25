@@ -25,11 +25,14 @@ public class BotConfiguration {
     @Value("${discordActivity}")
     String discordActivity;
 
+    @Value("${championName}")
+    String championName;
+
     @Bean
     public JDA createJDA() throws LoginException {
         JDA jda = JDABuilder.createDefault(token).build();
         jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing(discordActivity));
-        jda.addEventListener(new DiscordListener(prefix));
+        jda.addEventListener(new DiscordListener(prefix, championName));
         return jda;
     }
 
