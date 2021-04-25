@@ -2,7 +2,15 @@ package com.robnarok.yoneban.model;
 
 import com.robnarok.yoneban.wrapper.Matchdata;
 
+import javax.persistence.*;
+
+@Entity
 public class PersistentMatch {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     String matchID;
     boolean gotBanned;
     int counter;

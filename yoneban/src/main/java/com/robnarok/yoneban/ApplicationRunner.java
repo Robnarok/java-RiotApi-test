@@ -3,12 +3,12 @@ package com.robnarok.yoneban;
 import com.robnarok.yoneban.dto.MatchhistoryDTO;
 import com.robnarok.yoneban.dto.SummonerDTO;
 import com.robnarok.yoneban.model.PersistentMatch;
+import com.robnarok.yoneban.repository.PersistentMatchRepository;
 import com.robnarok.yoneban.services.ApiFetcher;
 import com.robnarok.yoneban.services.BanService;
 import com.robnarok.yoneban.wrapper.Matchdata;
 import com.robnarok.yoneban.wrapper.MatchdataList;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -30,6 +30,9 @@ public class ApplicationRunner implements CommandLineRunner {
     @Autowired
     BanService banService;
 
+    @Autowired
+    PersistentMatchRepository persistenMatchRepository;
+
     @Value("${summonerName}")
     String summonerName;
 
@@ -38,14 +41,22 @@ public class ApplicationRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
         SummonerDTO summoner = apiFetcher.requestSummonerDTO(summonerName);
         MatchhistoryDTO matchhistoryDTO = apiFetcher.requestLastFiveMatches(summoner.puuid);
+        List<PersistentMatch> persistentMatchList = persistenMatchRepository.findAll();
 
-        //Somehow filter which Matches are already checked
+        matchhistoryDTO.setMatches(banService.filterMatchDTOWithPersistenMatch(persistentMatchList ,matchhistoryDTO));
+
+        if (matchhistoryDTO.getMatches().size() == 0){
+            return; // Early Return
+        }
 
 
         Matchdata matchdata;
         MatchdataList matchdataList= new MatchdataList();
+
+
 
         for (String match : matchhistoryDTO.getMatches()) {
             matchdata = apiFetcher.requestBansFromMatch(match);
@@ -56,13 +67,7 @@ public class ApplicationRunner implements CommandLineRunner {
         matchdataList = banService.removeInvalid(matchdataList);
 
 
-        //ToDo: PersistenData
-        PersistentMatch persistentMatch = new PersistentMatch("EUW1_5229069076",true, 3);
-        PersistentMatch persistentMatch2 = new PersistentMatch("EUW1_5229069035",true, 3);
-
-        List<PersistentMatch> persistentMatchList = new ArrayList<>();
-        persistentMatchList.add(persistentMatch);
-        persistentMatchList.add(persistentMatch2);
+        //ToDo: PersistenData, these are only Dummies
 
         matchdataList = banService.filterWithPersistenMatch(persistentMatchList, matchdataList);
         //At this pont the matchdataList should only contain unchecked data
@@ -71,12 +76,20 @@ public class ApplicationRunner implements CommandLineRunner {
 
         List<PersistentMatch> newPersistenMatches = new ArrayList<PersistentMatch>();
 
+        int counter = newPersistenMatches.size();
+
         for (Matchdata matchdata1: matchdataList.getMatchdata()){
+            counter++;
             newPersistenMatches.add(new PersistentMatch(
                     matchdata1,
-                    championId,
-                    54));
+                    championId, counter));
+
         }
+
+        persistenMatchRepository.saveAll(newPersistenMatches);
+
+
+
 
         // Print new Bans
 
