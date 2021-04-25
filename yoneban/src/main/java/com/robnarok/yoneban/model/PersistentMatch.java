@@ -15,6 +15,10 @@ public class PersistentMatch {
     boolean gotBanned;
     int counter;
 
+    //Not Persisten, and really makes the Code 100 Worse.. but okay
+    @Transient
+    Matchdata matchdata;
+
     public PersistentMatch() {
     }
 
@@ -28,6 +32,7 @@ public class PersistentMatch {
         this.matchID = matchdata.getMatchId();
         this.gotBanned = matchdata.didChampGetBanned("777");
         this.counter = counter;
+        this.matchdata = matchdata;
     }
 
     public String getMatchID() {

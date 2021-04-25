@@ -49,7 +49,7 @@ public class ApplicationRunner implements CommandLineRunner {
         matchhistoryDTO.setMatches(banService.filterMatchDTOWithPersistenMatch(persistentMatchList ,matchhistoryDTO));
 
         if (matchhistoryDTO.getMatches().size() == 0){
-            return; // Early Return
+            return;
         }
 
 
@@ -63,11 +63,9 @@ public class ApplicationRunner implements CommandLineRunner {
             matchdataList.addMatchdata(matchdata);
         }
 
-
+        // Removes ARAM and Feature Gamemode Games, sadly after the API Query
         matchdataList = banService.removeInvalid(matchdataList);
 
-
-        //ToDo: PersistenData, these are only Dummies
 
         matchdataList = banService.filterWithPersistenMatch(persistentMatchList, matchdataList);
         //At this pont the matchdataList should only contain unchecked data
@@ -76,8 +74,8 @@ public class ApplicationRunner implements CommandLineRunner {
 
         List<PersistentMatch> newPersistenMatches = new ArrayList<PersistentMatch>();
 
+        // Counter could get improved
         int counter = newPersistenMatches.size();
-
         for (Matchdata matchdata1: matchdataList.getMatchdata()){
             counter++;
             newPersistenMatches.add(new PersistentMatch(
@@ -85,12 +83,7 @@ public class ApplicationRunner implements CommandLineRunner {
                     championId, counter));
 
         }
-
         persistenMatchRepository.saveAll(newPersistenMatches);
-
-
-
-
         // Print new Bans
 
         banService.printNewBanEvents(newPersistenMatches);

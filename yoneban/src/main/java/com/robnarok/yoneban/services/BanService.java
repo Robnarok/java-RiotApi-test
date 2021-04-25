@@ -79,7 +79,7 @@ public class BanService {
 
     public void printNewBanEvents (List<PersistentMatch> persistentMatchList){
         for (PersistentMatch persistentMatch : persistentMatchList){
-            discordPrint.printToDiscord("Champion has been banned!");
+            discordPrint.printEmbeded(persistentMatch);
         }
     }
 
