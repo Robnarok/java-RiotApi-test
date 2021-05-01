@@ -3,7 +3,9 @@ package com.robnarok.yoneban;
 import com.robnarok.yoneban.dto.MatchhistoryDTO;
 import com.robnarok.yoneban.dto.SummonerDTO;
 import com.robnarok.yoneban.model.PersistentMatch;
+import com.robnarok.yoneban.model.Summoner;
 import com.robnarok.yoneban.repository.PersistentMatchRepository;
+import com.robnarok.yoneban.repository.SummonerRepository;
 import com.robnarok.yoneban.services.ApiFetcher;
 import com.robnarok.yoneban.services.BanService;
 import com.robnarok.yoneban.wrapper.Matchdata;
@@ -38,69 +40,79 @@ public class ApplicationRunner implements CommandLineRunner {
     @Autowired
     PersistentMatchRepository persistenMatchRepository;
 
-    @Value("${summonerName}")
-    String summonerName;
+    @Autowired
+    SummonerRepository summonerRepository;
 
-    @Value("${championId}")
-    String championId;
+//    @Value("${summonerName}")
+//    String summonerName;
+//
+//    @Value("${championId}")
+//    String championId;
 
     @Override
 
     public void run(String... args){
-        System.out.println("Hello There");
+
     }
 
-    @Scheduled(fixedRate = 10 * 60 * 1000)
-    public void scheduledCheck(){
+    @Scheduled(fixedRate = 1 * 60 * 1000)
+    public void scheduledCheck() {
 
-        SummonerDTO summoner = apiFetcher.requestSummonerDTO(summonerName);
-        MatchhistoryDTO matchhistoryDTO = apiFetcher.requestLastFiveMatches(summoner.puuid);
-        List<PersistentMatch> persistentMatchList = persistenMatchRepository.findAll();
+        List<Summoner> summonerList = summonerRepository.findAll();
 
-        matchhistoryDTO.setMatches(banService.filterMatchDTOWithPersistenMatch(persistentMatchList ,matchhistoryDTO));
+        for (Summoner summoner : summonerList) {
+            List<PersistentMatch> persistentMatchList = persistenMatchRepository.findAllByChampionID(summoner.championId);
+            MatchhistoryDTO matchhistoryDTO = apiFetcher.requestLastFiveMatches(summoner.puuid);
 
-        if (matchhistoryDTO.getMatches().size() == 0){
-            return;
-        }
+            matchhistoryDTO.setMatches(banService.filterMatchDTOWithPersistenMatch(persistentMatchList, matchhistoryDTO));
 
-        Matchdata matchdata;
-        MatchdataList matchdataList= new MatchdataList();
-
-        for (String match : matchhistoryDTO.getMatches()) {
-            try {
-                matchdata = apiFetcher.requestBansFromMatch(match);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (matchhistoryDTO.getMatches().size() == 0) {
                 return;
             }
-            matchdataList.addMatchdata(matchdata);
+
+            Matchdata matchdata;
+            MatchdataList matchdataList = new MatchdataList();
+
+            for (String match : matchhistoryDTO.getMatches()) {
+                try {
+                    matchdata = apiFetcher.requestBansFromMatch(match);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                matchdataList.addMatchdata(matchdata);
+            }
+
+
+            // Removes ARAM and Feature Gamemode Games, sadly after the API Query
+            matchdataList = banService.removeInvalid(matchdataList);
+
+            List<PersistentMatch> newPersistenMatches = new ArrayList<PersistentMatch>();
+
+            // Counter could get improved
+            int counter = persistenMatchRepository.countByChampionIDAndGotBannedIsTrue(summoner.championId) + 1;
+
+            Collections.reverse(matchdataList.getMatchdata());
+            for (Matchdata matchdata1 : matchdataList.getMatchdata()) {
+
+                newPersistenMatches.add(new PersistentMatch(
+                        matchdata1,
+                        summoner.championId,
+                        summoner.championName,
+                        counter
+                ));
+                if (matchdata1.didChampGetBanned(summoner.championId))
+                    counter++;
+            }
+            persistenMatchRepository.saveAll(newPersistenMatches);
+
+            banService.printNewBanEvents(newPersistenMatches);
+
+
         }
-
-
-        // Removes ARAM and Feature Gamemode Games, sadly after the API Query
-        matchdataList = banService.removeInvalid(matchdataList);
-
-        List<PersistentMatch> newPersistenMatches = new ArrayList<PersistentMatch>();
-
-        // Counter could get improved
-        int counter = newPersistenMatches.size();
-
-        Collections.reverse( matchdataList.getMatchdata());
-        for (Matchdata matchdata1: matchdataList.getMatchdata()){
-            counter++;
-            newPersistenMatches.add(new PersistentMatch(
-                    matchdata1,
-                    championId, counter));
-
-        }
-        persistenMatchRepository.saveAll(newPersistenMatches);
-        banService.printNewBanEvents(newPersistenMatches);
 
     }
-
-
-
 }

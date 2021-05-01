@@ -1,11 +1,15 @@
 package com.robnarok.yoneban.wrapper;
 
+import lombok.Data;
+
+@Data
 public class Player {
     String summonerName;
     int pentaKills;
     String championName;
     String teamPosition;
     String teamId;
+
 
     public Player(String summonerName, int pentaKills, String championName, String teamPosition, int teamId) {
         this.summonerName = summonerName;

@@ -1,6 +1,7 @@
 package com.robnarok.yoneban.services;
 
 import com.robnarok.yoneban.model.PersistentMatch;
+import com.robnarok.yoneban.wrapper.Player;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class DiscordPrint {
@@ -21,7 +23,6 @@ public class DiscordPrint {
     @Value("${discordChannel}")
     String discordChannel;
 
-    @Value("${championName}")
     String championName;
 
     public void printToDiscord(String input){
@@ -29,8 +30,9 @@ public class DiscordPrint {
         textChannelById.sendMessage(input).queue();
     }
 
-    public void printEmbeded(PersistentMatch persistentMatch){
+    public void printEmbeded(PersistentMatch persistentMatch, List<Player> playersInGame){
         TextChannel textChannelById = jda.getTextChannelById(discordChannel);
+        championName = persistentMatch.getChampionName();
 
         EmbedBuilder embeded = new EmbedBuilder();
         embeded.setTitle("Banreport");
@@ -51,7 +53,12 @@ public class DiscordPrint {
         LocalDateTime localDateTime = new java.sql.Timestamp(date.getTime()).toLocalDateTime();
         DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("HH:mm:ss - dd.LL.yyyy");
 
-        embeded.addField("Uhrzeit", localDateTime.format(customFormatter), true);
+        embeded.addField("Uhrzeit", localDateTime.format(customFormatter), false);
+
+        for (Player player : playersInGame) {
+            embeded.addField("Mitspieler", player.getSummonerName(), true);
+        }
+
 
         String matchId = persistentMatch.getMatchID();
         matchId = matchId.split("_")[1];

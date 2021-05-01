@@ -12,4 +12,8 @@ public interface PersistentMatchRepository extends CrudRepository <PersistentMat
 
     List<PersistentMatch> findAll();
 
+    List<PersistentMatch> findAllByChampionID(String championId);
+
+    int countByChampionIDAndGotBannedIsTrue(String championId);
+
 }

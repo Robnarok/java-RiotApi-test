@@ -1,65 +1,70 @@
 package com.robnarok.yoneban.model;
 
 import com.robnarok.yoneban.wrapper.Matchdata;
+import lombok.Data;
 
 import javax.persistence.*;
 
 @Entity
+@Data
 public class PersistentMatch {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue
+    Long id;
 
     String matchID;
     boolean gotBanned;
+    String championID;
+    String championName;
     int counter;
 
-    //Not Persisten, and really makes the Code 100 Worse.. but okay
+    //Not Persistent, and really makes the Code 100 Worse.. but okay
     @Transient
     Matchdata matchdata;
+
 
     public Matchdata getMatchdata() {
         return matchdata;
     }
 
-    public PersistentMatch() {
-    }
-
-    public PersistentMatch(String matchID, boolean gotBanned, int counter) {
-        this.matchID = matchID;
-        this.gotBanned = gotBanned;
-        this.counter = counter;
-    }
-
-    public PersistentMatch(Matchdata matchdata, String championId, int counter){
+    public PersistentMatch(Matchdata matchdata, String championId, String championName, int counter) {
         this.matchID = matchdata.getMatchId();
-        this.gotBanned = matchdata.didChampGetBanned("777");
+        this.gotBanned = matchdata.didChampGetBanned(championId);
+        this.championID = championId;
+        this.championName = championName;
         this.counter = counter;
+
         this.matchdata = matchdata;
+
     }
 
-    public String getMatchID() {
-        return matchID;
+    public PersistentMatch(){
+
     }
 
-    public void setMatchID(String matchID) {
-        this.matchID = matchID;
-    }
-
-    public boolean isGotBanned() {
-        return gotBanned;
-    }
-
-    public void setGotBanned(boolean gotBanned) {
-        this.gotBanned = gotBanned;
-    }
-
-    public int getCounter() {
-        return counter;
-    }
-
-    public void setCounter(int counter) {
-        this.counter = counter;
-    }
+    // Boilerplate Code
+//    public String getMatchID() {
+//        return matchID;
+//    }
+//
+//    public void setMatchID(String matchID) {
+//        this.matchID = matchID;
+//    }
+//
+//    public boolean isGotBanned() {
+//        return gotBanned;
+//    }
+//
+//    public void setGotBanned(boolean gotBanned) {
+//        this.gotBanned = gotBanned;
+//    }
+//
+//    public int getCounter() {
+//        return counter;
+//    }
+//
+//    public void setCounter(int counter) {
+//        this.counter = counter;
+//    }
 }
