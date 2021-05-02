@@ -55,7 +55,7 @@ public class ApplicationRunner implements CommandLineRunner {
 
     }
 
-    @Scheduled(fixedRate = 1 * 60 * 1000)
+    @Scheduled(fixedRate = 20 * 60 * 1000)
     public void scheduledCheck() {
 
         List<Summoner> summonerList = summonerRepository.findAll();
@@ -67,7 +67,7 @@ public class ApplicationRunner implements CommandLineRunner {
             matchhistoryDTO.setMatches(banService.filterMatchDTOWithPersistenMatch(persistentMatchList, matchhistoryDTO));
 
             if (matchhistoryDTO.getMatches().size() == 0) {
-                return;
+                continue;
             }
 
             Matchdata matchdata;
@@ -78,10 +78,10 @@ public class ApplicationRunner implements CommandLineRunner {
                     matchdata = apiFetcher.requestBansFromMatch(match);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return;
+                    continue;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    return;
+                    continue;
                 }
                 matchdataList.addMatchdata(matchdata);
             }

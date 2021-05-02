@@ -28,8 +28,6 @@ public class BotConfiguration {
     @Value("${discordActivity}")
     String discordActivity;
 
-    @Value("${championName}")
-    String championName;
 
     @Autowired
     ApiFetcher apiFetcher;
@@ -41,7 +39,7 @@ public class BotConfiguration {
     public JDA createJDA() throws LoginException {
         JDA jda = JDABuilder.createDefault(token).build();
         jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing(discordActivity));
-        jda.addEventListener(new DiscordListener(prefix, championName, apiFetcher, summonerRepository));
+        jda.addEventListener(new DiscordListener(prefix, "Yone", apiFetcher, summonerRepository));
         return jda;
     }
 

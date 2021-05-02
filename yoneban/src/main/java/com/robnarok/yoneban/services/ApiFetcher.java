@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 public class ApiFetcher {
 
-    @Value("${apiSecret}")
+    @Value("${RIOT_API_KEY}")
     private String secret;
 
 

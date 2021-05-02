@@ -59,6 +59,11 @@ public class DiscordPrint {
             embeded.addField("Mitspieler", player.getSummonerName(), true);
         }
 
+        for (Player player : playersInGame) {
+            if (player.getPentaKills() > 0){
+                embeded.addField("ACHTUNG", player.getSummonerName() + " hat in diesem Match " + player.getPentaKills() + " PENTAKILL gemacht!!!", false);
+            }
+        }
 
         String matchId = persistentMatch.getMatchID();
         matchId = matchId.split("_")[1];

@@ -96,9 +96,8 @@ public class BanService {
                     }
                 }
             }
-            System.out.println(playersInGame);
-
-            discordPrint.printEmbeded(persistentMatch, playersInGame);
+            if(playersInGame.size() >= 2 || summonerList.size() == 1)
+                discordPrint.printEmbeded(persistentMatch, playersInGame);
 
             playersInGame = new ArrayList<>();
         }
