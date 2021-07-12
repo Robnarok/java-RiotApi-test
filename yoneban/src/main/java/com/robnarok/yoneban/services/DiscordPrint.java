@@ -20,7 +20,7 @@ public class DiscordPrint {
     @Autowired
     JDA jda;
 
-    @Value("${discordChannel}")
+    @Value("${DISCORD_CHANNEL}")
     String discordChannel;
 
     String championName;

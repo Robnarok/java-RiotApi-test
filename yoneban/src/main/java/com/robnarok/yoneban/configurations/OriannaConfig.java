@@ -16,7 +16,7 @@ public class OriannaConfig {
 
     public static void main(String[] args) {
         Orianna.setDefaultRegion(Region.EUROPE_WEST);
-        MatchHistory matchhistory = Orianna.summonerNamed("").get().matchHistory().withEndIndex(6).get();
+        MatchHistory matchhistory = Orianna.summonerNamed("DreiAugenFlappe").get().matchHistory().withEndIndex(6).get();
 
         for (Match match : matchhistory) {
 
@@ -24,24 +24,32 @@ public class OriannaConfig {
             List<Champion> champions = new ArrayList<>();
 
             for (Champion ban : bans) {
-                champions.add(ban);
+                if (ban.exists())
+                    champions.add(ban);
             }
             bans = match.getBlueTeam().getBans();
             for (Champion ban : bans) {
-                champions.add(ban);
+                if (ban.exists())
+                    champions.add(ban);
             }
 
             boolean isBanned = false;
 
             for (Champion champion : champions) {
-                if (champion.getName().equals("Yone")){
+                if (champion.getName().equals("Yone")) {
                     isBanned = true;
-                    break;
                 }
             }
-            System.out.println("Yone wurde gebannt");
-        }
 
+            String matchID = "" + match.getId();
+            if (isBanned) {
+                System.out.println(matchID + ": Yone wurde gebannt");
+                continue;
+            } else {
+                System.out.println(matchID + ": Du bist eine Schande.");
+                continue;
+            }
+        }
 
 
     }

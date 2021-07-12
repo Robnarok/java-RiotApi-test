@@ -19,13 +19,13 @@ import javax.security.auth.login.LoginException;
 @Configuration
 public class BotConfiguration {
 
-    @Value("${discordToken}")
+    @Value("${DISCORD_TOKEN}")
     String token;
 
-    @Value("${discordPrefix}")
+    @Value("${DISCORD_PREFIX}")
     String prefix;
 
-    @Value("${discordActivity}")
+    @Value("${DISCORD_ACTIVITY}")
     String discordActivity;
 
 
